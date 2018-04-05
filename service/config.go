@@ -1,10 +1,17 @@
 package service
 
 import (
+	"github.com/dedis/kyber"
 	"github.com/dedis/kyber/share"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/network"
 )
+
+var ConfigType network.MessageTypeID
+
+func init() {
+	ConfigType = network.RegisterMessage(&Config{})
+}
 
 // Config holds all the parameters for the consensus protocol
 type Config struct {
@@ -16,7 +23,7 @@ type Config struct {
 	BlockMakerNb int          // how many nodes for the block makers
 	NotarizerNb  int          // how many notarizers in the simulation
 
-	Public       *share.PubPoly  // public polynomial
+	Public       []kyber.Point   // to reconstruct public polynomial
 	Share        *share.PriShare // private share
 	Threshold    int             // threshold of the threshold sharing scheme
 	BlockSize    int             // the size of the block in bytes

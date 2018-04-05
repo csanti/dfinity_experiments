@@ -84,5 +84,5 @@ func (b *BlockMaker) NewRound(p *BeaconPacket) {
 	go b.broadcast(b.c.NotarizerNodes(), blockProposal)
 
 	weights := Weights(b.c.BlockMakerNb, p.Randomness)
-	log.Lvl1("blockmaker broadcasted block (weight", weights[header.Owner], ") ", header.Hash(), "on top of ", string(oldBlock.Blob))
+	log.Lvl1("blockmaker broadcasted block (weight", weights[header.Owner], ") ", header.Hash(), "on top of ", oldBlock.BlockHeader.Hash())
 }

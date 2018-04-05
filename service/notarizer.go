@@ -99,7 +99,7 @@ func (m *Notarizer) roundLoop(round int) {
 	}()
 	// sleep the finalization time
 	time.Sleep(time.Duration(m.c.BlockTime) * time.Millisecond)
-	log.Lvl1("notarizer enters round loop for round ", round)
+	//log.Lvl1("notarizer enters round loop for round ", round)
 	// test if things look correct
 	m.Cond.L.Lock()
 	defer m.Cond.L.Unlock()
@@ -164,7 +164,7 @@ func (m *Notarizer) roundLoop(round int) {
 
 		if notarized := roundStorage.HighestNotarizedBlock(); notarized != nil {
 			// a block is notarized ! quit notarizing for this round
-			log.Lvl1("notarizer broadcasting notarized block for round", notarized.Block.Round)
+			log.Lvl1("notarizer broadcasting notarized block round", notarized.Block.Round, ":", notarized.BlockHeader.Hash())
 			go m.broadcast(m.c.Roster.List, notarized)
 			return
 		}
@@ -173,7 +173,7 @@ func (m *Notarizer) roundLoop(round int) {
 			panic("that should never happen")
 		}
 
-		log.Lvl1("notarizer broadcasted sig proposal for ", sigProposal.BlockHeader.Hash(), "TO ", m.c.NotarizerNodes())
+		//log.Lvl1("notarizer broadcasted sig proposal for ", sigProposal.BlockHeader.Hash())
 		// broadcast the signature
 		go m.broadcast(m.c.NotarizerNodes(), sigProposal)
 		if mustQuit {
@@ -209,7 +209,7 @@ func (m *Notarizer) NewBlockProposal(p *BlockProposal) {
 		m.tmpBlocks[p.Round] = append(m.tmpBlocks[p.Round], p)
 		return
 	}
-	log.Lvl1("notarizer storing new block proposal", p.BlockHeader.Hash())
+	//log.Lvl1("notarizer storing new block proposal", p.BlockHeader.Hash())
 	round.StoreBlockProposal(p)
 }
 

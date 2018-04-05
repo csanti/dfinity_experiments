@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/dedis/kyber/share"
 	"github.com/dedis/kyber/sign/tbls"
 	"github.com/dedis/onet/log"
 )
@@ -148,6 +149,7 @@ type blockStorage struct {
 	finalSig  []byte         // when notarization happenned
 	sigs      map[int][]byte // all signatures for the blob received so far
 	notarized bool           // true if already notarized
+	pub       *share.PubPoly
 }
 
 // newBlockStorage returns a new storage for this block holding on all
@@ -157,6 +159,7 @@ func newBlockStorage(c *Config, b *Block) *blockStorage {
 		c:     c,
 		block: b,
 		sigs:  make(map[int][]byte),
+		pub:   share.NewPubPoly(G2, G2.Point().Base(), c.Public),
 	}
 }
 
@@ -168,7 +171,7 @@ func (b *blockStorage) AddPartialSig(s []byte) (*NotarizedBlock, error) {
 		return nil, nil
 	}
 
-	err := tbls.Verify(Suite, b.c.Public, []byte(b.block.BlockHeader.Hash()), s)
+	err := tbls.Verify(Suite, b.pub, []byte(b.block.BlockHeader.Hash()), s)
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +193,7 @@ func (b *blockStorage) AddPartialSig(s []byte) (*NotarizedBlock, error) {
 	}
 
 	hash := b.block.BlockHeader.Hash()
-	signature, err := tbls.Recover(Suite, b.c.Public, []byte(hash), arr, b.c.Threshold, b.c.N)
+	signature, err := tbls.Recover(Suite, b.pub, []byte(hash), arr, b.c.Threshold, b.c.N)
 	if err != nil {
 		return nil, err
 	}

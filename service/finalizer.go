@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
-	"github.com/dedis/onet/log"
 )
 
 // Chain is the chain that contains only blocks that are final,i.e.
@@ -119,7 +117,6 @@ func (f *Finalizer) Store(n *NotarizedBlock) {
 	//log.Lvl1("Finalizer: not. block round", n.Round, " before?", before, " => key", key, " => ", f.notarized[key])
 	if !before && key == f.round {
 		// first time we see a notarized block for the current round
-		log.Lvl1("Finalizer : CALLING FINALIZE on round ")
 		go f.finalize(f.round)
 	}
 }
@@ -173,7 +170,6 @@ func (f *Finalizer) HighestChainHead(round int) (*NotarizedBlock, error) {
 		//fmt.Println("weights: ", weights, " ==> owner: ", block.Owner)
 		return weights[block.Owner]
 	}
-	fmt.Printf("HighestChainhead: endRound: %d, startRound: %d\n", endRound, startRound)
 	// max weight to block returns the maximum chain weight found going back to the
 	// finalized chain
 	var maxWeightToBlock func(block *NotarizedBlock) int

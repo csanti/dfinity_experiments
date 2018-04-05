@@ -31,6 +31,7 @@ func NewDfinityService(c *onet.Context) (onet.Service, error) {
 		context:          c,
 		ServiceProcessor: onet.NewServiceProcessor(c),
 	}
+	c.RegisterProcessor(d, ConfigType)
 	c.RegisterProcessor(d, BlockProposalType)
 	c.RegisterProcessor(d, NotarizedBlockType)
 	c.RegisterProcessor(d, SignatureProposalType)
@@ -65,6 +66,8 @@ func (d *Dfinity) Start() {
 // Process
 func (d *Dfinity) Process(e *network.Envelope) {
 	switch inner := e.Msg.(type) {
+	case *Config:
+		d.SetConfig(inner)
 	case *BeaconPacket:
 		if d.not != nil {
 			d.not.Process(e)
