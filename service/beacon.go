@@ -2,78 +2,90 @@ package service
 
 import (
 	"math/rand"
+	"sync"
 
+	"github.com/dedis/onet"
+	"github.com/dedis/onet/log"
 	"github.com/dedis/onet/network"
 )
 
-// Beacon is a simulation of the randomness beacon from the paper. It is simply
-// a local PNRG initiated with a known seed so every participants generate the
-// same "random" permutations.
+const seed = 1234567890
+const BeaconServiceName = "beacon"
+
+// Beacon produces a new random value every new round and broadcasts it
 type Beacon struct {
-	seed      int64
-	currRound int
-	state     *rand.Rand
-	perms     map[int]map[int]int
-	n         int // number of participants
+	sync.Mutex
+	*onet.ServiceProcessor
+	c         *Config
+	r         *rand.Rand
+	round     int
+	broadcast BroadcastFn
 }
 
-// NewBeacon returns a new beacon out of the given seed and the original list of
-// participants
-func NewBeacon(seed int64, list []*network.ServerIdentity) *Beacon {
-	b := &Beacon{
-		seed:      seed,
-		currRound: 0,
-		state:     rand.New(rand.NewSource(seed)),
-		perms:     make(map[int]map[int]int),
-		n:         len(list),
+// NewBeaconProcess returns a fresh Beacon process
+func NewBeaconProcess(c *onet.Context, conf *Config, b BroadcastFn) *Beacon {
+	return &Beacon{
+		c:                conf,
+		r:                rand.New(rand.NewSource(seed)),
+		ServiceProcessor: onet.NewServiceProcessor(c),
+		broadcast:        b,
 	}
-	return b
 }
 
-// Round returns the current round where this beacon is
-func (b *Beacon) Round() int {
-	return b.currRound
-}
-
-// Next moves the beacon to the next round and returns the permutation for the
-// new round. The permutation is the mapping between the original index and the
-// new index for this round for each participants
-func (b *Beacon) Next() map[int]int {
-	b.currRound++
-	return b.Perm(b.currRound)
-}
-
-// Perm returns the permutation of the list of nodes for a given round
-func (b *Beacon) Perm(round int) map[int]int {
-	perm, exists := b.perms[round]
-	if !exists {
-		if round < b.currRound {
-			panic("this should never happen")
-		}
-		if round > b.currRound+1 {
-			panic("nodes should have 1 round maximum difference")
-		}
-		b.perms[round+1] = make(map[int]int)
-		for i, v := range b.state.Perm(len(perm)) {
-			b.perms[round+1][v] = i
-		}
-		perm = b.perms[round+1]
+// Process analyzes incoming packets
+func (b *Beacon) Process(e *network.Envelope) {
+	b.Lock()
+	defer b.Unlock()
+	switch inner := e.Msg.(type) {
+	case *NotarizedBlock:
+		b.NewRound(inner.Round)
+	default:
+		panic("beacon: should not happen")
 	}
-	return perm
 }
 
-// Weights computes the weights of the blocks during a given round. It returns
+// NewRound generates the new randomness and sends its to all other nodes
+func (b *Beacon) NewRound(r int) {
+	if r != b.round {
+		log.Lvl2("beacon service received different round")
+		return
+	}
+	b.round++
+	nextRandomness := b.r.Int63()
+	packet := &BeaconPacket{
+		Round:      b.round,
+		Randomness: nextRandomness,
+	}
+	for _, si := range append(b.c.NotarizerNodes(), b.c.BlockMakerNodes()...) {
+		go b.SendRaw(si, packet)
+	}
+	log.Lvl1("beacon: new round started ", b.round)
+}
+
+// Start runs the first round
+func (b *Beacon) Start() {
+	b.NewRound(0)
+}
+
+// Permutation returns the mapping from oroginal index to the new index in order
+// to compute the ranking
+func Permutation(n int, randomness int64) map[int]int {
+	perms := rand.New(rand.NewSource(randomness)).Perm(n)
+	maps := make(map[int]int)
+	for i := 0; i < n; i++ {
+		maps[i] = perms[i]
+	}
+	return maps
+}
+
 // all weights for all possible block for a round. The weights are computed as
 // len(participants) - newIdex for each owner so we avoid float64 computations.
-func (b *Beacon) Weights(round int) []int {
-	perm, exists := b.perms[round]
-	if !exists {
-		perm = b.Perm(round)
-	}
-	weights := make([]int, b.n)
-	for i := 0; i < b.n; i++ {
+func Weights(n int, randomness int64) []int {
+	perm := Permutation(n, randomness)
+	weights := make([]int, n)
+	for i := 0; i < n; i++ {
 		newIndex := perm[i]
-		weights[i] = b.n - newIndex
+		weights[i] = newIndex + 1
 	}
 	return weights
 }

@@ -5,35 +5,33 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 
-	"github.com/dedis/kyber/share"
-	"github.com/dedis/onet"
+	"github.com/dedis/onet/network"
 )
 
-// Config holds all the parameters for the consensus protocol
-type Config struct {
-	Seed         int64           // seed to construct the PRNG => random beacon
-	Public       *share.PubPoly  // public polynomial
-	Share        *share.PriShare // private share
-	Roster       *onet.Roster    // participants
-	Threshold    int             // threshold of the threshold sharing scheme
-	N            int             // length of participants
-	BlockSize    int             // the size of the block in bytes
-	Proposers    int             // how many nodes should propose a block
-	BlockTime    int             // blocktime in seconds
-	FinalizeTime int             // time T to wait during finalization
-	StartTime    int64           // when to start the blockchain
+var BlockProposalType network.MessageTypeID
+var NotarizedBlockType network.MessageTypeID
+var SignatureProposalType network.MessageTypeID
+var BeaconType network.MessageTypeID
+
+func init() {
+	BlockProposalType = network.RegisterMessage(&BlockProposal{})
+	NotarizedBlockType = network.RegisterMessage(&NotarizedBlock{})
+	SignatureProposalType = network.RegisterMessage(&SignatureProposal{})
+	BeaconType = network.RegisterMessage(&BeaconPacket{})
 }
 
 // BlockHeader represents all the information regarding a block
 type BlockHeader struct {
-	Round   int    // round of the block
-	Owner   int    // index of the owner of the block
-	Root    string // hash of the data
-	PrvHash string // hash of the previous block
-	PrvSig  []byte // signature of the previous block (i.e. notarization)
+	Round      int    // round of the block
+	Owner      int    // index of the owner of the block
+	Root       string // hash of the data
+	Randomness int64  // randomness of the round
+	PrvHash    string // hash of the previous block
+	PrvSig     []byte // signature of the previous block (i.e. notarization)
 }
 
 // Block represents how a block is stored locally
+// Block is first sent from a block maker
 type Block struct {
 	BlockHeader
 	Blob []byte // the actual content
@@ -44,19 +42,26 @@ type Notarization struct {
 	Signature []byte
 }
 
-// BlockProposal is sent when a participants propose a new block
-type BlockProposal struct {
-	BlockHeader
-	Blob    []byte // the actual content
-	Partial []byte // partial signature over the header
+// NotarizedBlock is a block that has been notarized, so it includes the block
+// and the notarization associated
+type NotarizedBlock struct {
+	*Block
+	*Notarization
 }
+
+// BlockProposal is a block proposed by a block maker
+type BlockProposal Block
 
 // ProposalSignature represents the signature over a block
 type SignatureProposal struct {
-	BlockHeader        // Header that represents the block
-	Blob        []byte // data blob as mentionned in the paper
-	Signer      int    // Signer's index in the original list of participants
-	Partial     []byte // Partial signature from the signer
+	*Block
+	Partial []byte // Partial signature from the signer
+}
+
+// Packet sent by the randomness beacon. Simulated DKG...
+type BeaconPacket struct {
+	Round      int
+	Randomness int64
 }
 
 // Hash returns the hash in hexadecimal of the header
@@ -71,6 +76,13 @@ func (h *BlockHeader) Hash() string {
 	return hex.EncodeToString(buff)
 }
 
+func rootHash(data []byte) string {
+	h := sha256.New()
+	h.Write(data)
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+// GenesisBlock is the first block of the chain
 var GenesisBlock = &Block{
 	BlockHeader: BlockHeader{
 		Round: 0,
@@ -81,11 +93,5 @@ var GenesisBlock = &Block{
 		// echo "hello world" | sha256sum | sha256sum
 		PrvSig: []byte("3605ff73b6faec27aa78e311603e9fe2ef35bad82ccf46fc707814bfbdcc6f9e"),
 	},
-	Blob: []byte("Remember when you were young?"),
-}
-
-func rootHash(data []byte) string {
-	h := sha256.New()
-	h.Write(data)
-	return hex.EncodeToString(h.Sum(nil))
+	Blob: []byte("Hello Genesis"),
 }
