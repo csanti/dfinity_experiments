@@ -7,26 +7,27 @@ import (
 )
 
 var Suite = bn256.NewSuite()
-var g2 = Suite.G2()
-var dfinityName = "dfinity"
+var G2 = Suite.G2()
+var Name = "dfinity"
 
 func init() {
-	onet.RegisterNewService(dfinityName, NewDfinityService)
+	onet.RegisterNewService(Name, NewDfinityService)
 }
 
-// dfinity service is either a beacon a notarizer or a block maker
-type dfinity struct {
+// Dfinity service is either a beacon a notarizer or a block maker
+type Dfinity struct {
 	*onet.ServiceProcessor
 	context *onet.Context
 	c       *Config
 	beacon  *Beacon
 	not     *Notarizer
 	bm      *BlockMaker
+	fin     *Finalizer
 }
 
 // NewDfinityService
 func NewDfinityService(c *onet.Context) (onet.Service, error) {
-	d := &dfinity{
+	d := &Dfinity{
 		context:          c,
 		ServiceProcessor: onet.NewServiceProcessor(c),
 	}
@@ -37,11 +38,10 @@ func NewDfinityService(c *onet.Context) (onet.Service, error) {
 	return d, nil
 }
 
-func (d *dfinity) SetConfig(c *Config) {
+func (d *Dfinity) SetConfig(c *Config) {
 	d.c = c
 	if c.IsBeacon(c.Index) {
 		d.beacon = NewBeaconProcess(d.context, c, d.broadcast)
-		d.beacon.Start()
 	} else if c.IsBlockMaker(c.Index) {
 		d.bm = NewBlockMakerProcess(d.context, c, d.broadcast)
 	} else if c.IsNotarizer(c.Index) {
@@ -49,14 +49,29 @@ func (d *dfinity) SetConfig(c *Config) {
 	}
 }
 
+func (d *Dfinity) AttachCallback(fn func(int)) {
+	chain := new(Chain)
+	d.fin = NewFinalizer(d.c, chain, fn)
+}
+
+func (d *Dfinity) Start() {
+	if d.beacon != nil {
+		d.beacon.Start()
+	} else {
+		panic("that should not happen")
+	}
+}
+
 // Process
-func (d *dfinity) Process(e *network.Envelope) {
-	switch e.Msg.(type) {
+func (d *Dfinity) Process(e *network.Envelope) {
+	switch inner := e.Msg.(type) {
 	case *BeaconPacket:
 		if d.not != nil {
 			d.not.Process(e)
 		} else if d.bm != nil {
 			d.bm.Process(e)
+		} else if d.beacon != nil {
+			d.beacon.Process(e)
 		}
 	case *BlockProposal:
 		if d.not != nil {
@@ -72,12 +87,15 @@ func (d *dfinity) Process(e *network.Envelope) {
 		} else if d.bm != nil {
 			d.bm.Process(e)
 		}
+		if d.fin != nil {
+			d.fin.Store(inner)
+		}
 	}
 }
 
 type BroadcastFn func(sis []*network.ServerIdentity, msg interface{})
 
-func (d *dfinity) broadcast(sis []*network.ServerIdentity, msg interface{}) {
+func (d *Dfinity) broadcast(sis []*network.ServerIdentity, msg interface{}) {
 	for _, si := range sis {
 		if d.ServerIdentity().Equal(si) {
 			continue

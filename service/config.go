@@ -20,7 +20,6 @@ type Config struct {
 	Share        *share.PriShare // private share
 	Threshold    int             // threshold of the threshold sharing scheme
 	BlockSize    int             // the size of the block in bytes
-	Proposers    int             // how many nodes should propose a block
 	BlockTime    int             // blocktime in seconds
 	FinalizeTime int             // time T to wait during finalization
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"crypto/rand"
 	"fmt"
 	"sync"
 
@@ -63,7 +64,10 @@ func (b *BlockMaker) NewRound(p *BeaconPacket) {
 		fmt.Println(b.fin.notarized)
 		panic(err)
 	}
-	blob := []byte(fmt.Sprintf("block data round %d owner %d", p.Round, b.c.Index))
+	//blob := []byte(fmt.Sprintf("block data round %d owner %d", p.Round, b.c.Index))
+	blob := make([]byte, b.c.BlockSize)
+	rand.Read(blob)
+
 	hash := rootHash(blob)
 	header := BlockHeader{
 		Round:      newRound,

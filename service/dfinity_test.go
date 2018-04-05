@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/dedis/kyber"
 	"github.com/dedis/kyber/pairing"
@@ -44,7 +43,7 @@ func TestDfinity(t *testing.T) {
 	log.Lvlf1("=> dfinity test with %d nodes: %d beacon, %d bm, %d notarizers", n, beaconNb, blockMakerNb, notarizerNb)
 	shares, public := dkg(threshold, notarizerNb)
 	notIndex := beaconNb + blockMakerNb
-	dfinities := make([]*dfinity, n, n)
+	dfinities := make([]*Dfinity, n, n)
 	for i := 0; i < n; i++ {
 		c := &Config{
 			Seed:         seed,
@@ -63,10 +62,18 @@ func TestDfinity(t *testing.T) {
 		if i >= notIndex {
 			c.Share = shares[i-notIndex]
 		}
-		dfinities[i] = servers[i].Service(dfinityName).(*dfinity)
+		dfinities[i] = servers[i].Service(Name).(*Dfinity)
 		dfinities[i].SetConfig(c)
 	}
-	time.Sleep(3 * time.Second)
+	done := make(chan bool)
+	cb := func(r int) {
+		if r > 10 {
+			done <- true
+		}
+	}
+	dfinities[0].AttachCallback(cb)
+	go dfinities[0].Start()
+	<-done
 	fmt.Println(dfinities[n-1].not.finalizer.chain.String())
 }
 
@@ -74,17 +81,17 @@ func dkg(t, n int) ([]*share.PriShare, *share.PubPoly) {
 	allShares := make([][]*share.PriShare, n)
 	var public *share.PubPoly
 	for i := 0; i < n; i++ {
-		priPoly := share.NewPriPoly(g2, t, nil, random.New())
+		priPoly := share.NewPriPoly(G2, t, nil, random.New())
 		allShares[i] = priPoly.Shares(n)
 		if public == nil {
-			public = priPoly.Commit(g2.Point().Base())
+			public = priPoly.Commit(G2.Point().Base())
 			continue
 		}
-		public, _ = public.Add(priPoly.Commit(g2.Point().Base()))
+		public, _ = public.Add(priPoly.Commit(G2.Point().Base()))
 	}
 	shares := make([]*share.PriShare, n)
 	for i := 0; i < n; i++ {
-		v := g2.Scalar().Zero()
+		v := G2.Scalar().Zero()
 		for j := 0; j < n; j++ {
 			v = v.Add(v, allShares[j][i].V)
 		}

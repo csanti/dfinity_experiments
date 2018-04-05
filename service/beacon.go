@@ -20,6 +20,7 @@ type Beacon struct {
 	r         *rand.Rand
 	round     int
 	broadcast BroadcastFn
+	fin       *Finalizer
 }
 
 // NewBeaconProcess returns a fresh Beacon process
@@ -37,6 +38,10 @@ func (b *Beacon) Process(e *network.Envelope) {
 	b.Lock()
 	defer b.Unlock()
 	switch inner := e.Msg.(type) {
+	case *BeaconPacket:
+		// special case when we have different randomness beacon and only one is
+		// starting, or when one beacon is late behind
+		b.round++
 	case *NotarizedBlock:
 		b.NewRound(inner.Round)
 	default:
