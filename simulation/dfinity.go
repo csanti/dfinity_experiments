@@ -6,6 +6,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/log"
+	"github.com/dedis/onet/simul/monitor"
 	dfinity "github.com/dedis/paper_18_dfinity/service"
 )
 
@@ -100,6 +101,7 @@ func (s *Simulation) Run(config *onet.SimulationConfig) error {
 	}
 
 	dfinity.AttachCallback(newRoundCb)
+	fullTime := monitor.NewTimeMeasure("finalizing")
 	dfinity.Start()
 	select {
 	case <-done:
@@ -108,6 +110,10 @@ func (s *Simulation) Run(config *onet.SimulationConfig) error {
 		panic("not finished yet")
 
 	}
-	log.Lvl1("End of simulation!")
+	fullTime.Record()
+	monitor.RecordSingleMeasure("blocks", float64(roundDone))
+	log.Lvl1(" ---------------------------")
+	log.Lvl1("End of simulation => ", roundDone, " rounds done")
+	log.Lvl1(" ---------------------------")
 	return nil
 }
