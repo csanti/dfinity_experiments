@@ -106,8 +106,8 @@ func (s *Simulation) Run(config *onet.SimulationConfig) error {
 	select {
 	case <-done:
 		break
-	case <-time.After(30 * time.Second):
-		panic("not finished yet")
+		//case <-time.After(30 * time.Second):
+		//panic("not finished yet")
 
 	}
 	fullTime.Record()

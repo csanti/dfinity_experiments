@@ -55,7 +55,7 @@ func (b *BlockMaker) NewRound(p *BeaconPacket) {
 	b.Cond.L.Lock()
 	defer b.Cond.L.Unlock()
 	for b.fin.HighestRound() < p.Round-1 {
-		log.Lvl1("blockmaker: waiting highest round go to ", p.Round-1, " => ", b.fin.notarized)
+		log.Lvl1("blockmaker: waiting highest round go to ", p.Round-1)
 		b.Cond.Wait()
 	}
 	newRound := p.Round
