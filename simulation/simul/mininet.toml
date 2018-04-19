@@ -1,8 +1,9 @@
 Simulation = "dfinity"
 Servers = 2
 Bf = 3
-Rounds = 5000
+Rounds = 50
 Suite = "bn256.G2"
+Delay = 100
 Seed = 123456789
 BeaconNb = 1
 BlockMakerNb = 2
