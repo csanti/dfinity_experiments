@@ -1,7 +1,7 @@
 Simulation = "dfinity"
 Servers = 6
 Bf = 3
-Rounds = 5000
+Rounds = 100
 Suite = "bn256.G2"
 Seed = 123456789
 BeaconNb = 1
@@ -9,7 +9,7 @@ BlockMakerNb = 2
 NotarizerNb = 3
 Threshold = 3
 BlockSize = 100
-BlockTime = 500 
+BlockTime = 500
 FinalizeTime = 500
 
 Hosts

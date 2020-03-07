@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/dedis/onet/simul"
-	_ "github.com/dedis/paper_18_dfinity/simulation"
+	"go.dedis.ch/onet/simul"
+	_ "github.com/csanti/dfinity_experiments/simulation"
 )
 
 func main() {

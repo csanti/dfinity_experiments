@@ -3,10 +3,10 @@ package simulation
 import (
 	"reflect"
 
-	"github.com/dedis/kyber"
-	"github.com/dedis/kyber/share"
-	"github.com/dedis/kyber/util/random"
-	dfinity "github.com/dedis/paper_18_dfinity/service"
+	"go.dedis.ch/kyber"
+	"go.dedis.ch/kyber/share"
+	"go.dedis.ch/kyber/util/random"
+	dfinity "github.com/csanti/dfinity_experiments/service"
 	"github.com/dedis/protobuf"
 )
 

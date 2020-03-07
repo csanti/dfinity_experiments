@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/dedis/kyber"
-	"github.com/dedis/kyber/pairing"
-	"github.com/dedis/kyber/share"
-	"github.com/dedis/kyber/util/random"
-	"github.com/dedis/onet"
-	"github.com/dedis/onet/log"
+	"go.dedis.ch/kyber"
+	"go.dedis.ch/kyber/pairing"
+	"go.dedis.ch/kyber/share"
+	"go.dedis.ch/kyber/util/random"
+	"go.dedis.ch/onet"
+	"go.dedis.ch/onet/log"
 )
 
 type networkSuite struct {

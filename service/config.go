@@ -1,10 +1,10 @@
 package service
 
 import (
-	"github.com/dedis/kyber"
-	"github.com/dedis/kyber/share"
-	"github.com/dedis/onet"
-	"github.com/dedis/onet/network"
+	"go.dedis.ch/kyber"
+	"go.dedis.ch/kyber/share"
+	"go.dedis.ch/onet"
+	"go.dedis.ch/onet/network"
 )
 
 var ConfigType network.MessageTypeID

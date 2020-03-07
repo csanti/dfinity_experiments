@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/dedis/kyber/share"
-	"github.com/dedis/kyber/sign/tbls"
-	"github.com/dedis/onet/log"
+	"go.dedis.ch/kyber/share"
+	"go.dedis.ch/kyber/sign/tbls"
+	"go.dedis.ch/onet/log"
 )
 
 // roundStorage keeps tracks of all received valid blocks for a given round and

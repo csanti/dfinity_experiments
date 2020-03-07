@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	"github.com/dedis/onet"
-	"github.com/dedis/onet/log"
-	"github.com/dedis/onet/simul/monitor"
-	dfinity "github.com/dedis/paper_18_dfinity/service"
+	dfinity "github.com/csanti/dfinity_experiments/service"
+	"go.dedis.ch/onet"
+	"go.dedis.ch/onet/log"
+	"go.dedis.ch/onet/simul/monitor"
 )
 
 // Name is the name of the simulation
