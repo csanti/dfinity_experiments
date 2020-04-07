@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 
-	"go.dedis.ch/onet/network"
+	"github.com/csanti/onet/network"
 )
 
 var BlockProposalType network.MessageTypeID

@@ -8,8 +8,8 @@ import (
 	"go.dedis.ch/kyber/pairing"
 	"go.dedis.ch/kyber/share"
 	"go.dedis.ch/kyber/util/random"
-	"go.dedis.ch/onet"
-	"go.dedis.ch/onet/log"
+	"github.com/csanti/onet"
+	"github.com/csanti/onet/log"
 )
 
 type networkSuite struct {

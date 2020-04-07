@@ -3,8 +3,8 @@ package service
 import (
 	"go.dedis.ch/kyber"
 	"go.dedis.ch/kyber/share"
-	"go.dedis.ch/onet"
-	"go.dedis.ch/onet/network"
+	"github.com/csanti/onet"
+	"github.com/csanti/onet/network"
 )
 
 var ConfigType network.MessageTypeID

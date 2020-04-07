@@ -2,8 +2,8 @@ package service
 
 import (
 	"go.dedis.ch/kyber/pairing/bn256"
-	"go.dedis.ch/onet"
-	"go.dedis.ch/onet/network"
+	"github.com/csanti/onet"
+	"github.com/csanti/onet/network"
 )
 
 var Suite = bn256.NewSuite()

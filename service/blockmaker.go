@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"sync"
 
-	"go.dedis.ch/onet"
-	"go.dedis.ch/onet/log"
-	"go.dedis.ch/onet/network"
+	"github.com/csanti/onet"
+	"github.com/csanti/onet/log"
+	"github.com/csanti/onet/network"
 )
 
 // BlockMaker creates new blocks for each round

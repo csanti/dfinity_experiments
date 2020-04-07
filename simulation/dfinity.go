@@ -5,9 +5,9 @@ import (
 
 	"github.com/BurntSushi/toml"
 	dfinity "github.com/csanti/dfinity_experiments/service"
-	"go.dedis.ch/onet"
-	"go.dedis.ch/onet/log"
-	"go.dedis.ch/onet/simul/monitor"
+	"github.com/csanti/onet"
+	"github.com/csanti/onet/log"
+	"github.com/csanti/onet/simul/monitor"
 )
 
 // Name is the name of the simulation
