@@ -70,6 +70,7 @@ func (s *Simulation) DistributeConfig(config *onet.SimulationConfig) {
 			BlockTime:    s.BlockTime,
 			FinalizeTime: s.FinalizeTime,
 			Public:       commits,
+			RoundsToSimulate: s.Rounds,
 		}
 		if i >= notIndex {
 			c.Share = shares[i-notIndex]
@@ -92,16 +93,21 @@ func (s *Simulation) Run(config *onet.SimulationConfig) error {
 
 	var roundDone int
 	done := make(chan bool)
+	var fullRound *monitor.TimeMeasure
 	newRoundCb := func(round int) {
+		fullRound.Record()
 		roundDone++
 		log.Lvl1("Simulation Round #", round, "incorporated")
 		if roundDone > s.Rounds {
 			done <- true
+		} else {
+			fullRound = monitor.NewTimeMeasure("fullRound")
 		}
 	}
 
 	dfinity.AttachCallback(newRoundCb)
 	fullTime := monitor.NewTimeMeasure("finalizing")
+	fullRound = monitor.NewTimeMeasure("fullRound")
 	dfinity.Start()
 	select {
 	case <-done:
@@ -112,8 +118,12 @@ func (s *Simulation) Run(config *onet.SimulationConfig) error {
 	}
 	fullTime.Record()
 	monitor.RecordSingleMeasure("blocks", float64(roundDone))
+	monitor.RecordSingleMeasure("avgRound", fullTime.Wall.Value / float64(s.Rounds))
 	log.Lvl1(" ---------------------------")
 	log.Lvl1("End of simulation => ", roundDone, " rounds done")
+	log.Lvl1("Last full round = ",fullRound.Wall.Value)
+	log.Lvl1("Total time = ", fullTime.Wall.Value)
+	log.Lvl1("Avg round = ", fullTime.Wall.Value / float64(s.Rounds))
 	log.Lvl1(" ---------------------------")
 	return nil
 }

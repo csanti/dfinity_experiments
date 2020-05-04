@@ -29,6 +29,7 @@ type Config struct {
 	BlockSize    int             // the size of the block in bytes
 	BlockTime    int             // blocktime in seconds
 	FinalizeTime int             // time T to wait during finalization
+	RoundsToSimulate int
 }
 
 // NotarizerNodes returns the list of notarizers for the given config

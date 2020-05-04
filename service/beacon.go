@@ -51,6 +51,9 @@ func (b *Beacon) Process(e *network.Envelope) {
 
 // NewRound generates the new randomness and sends its to all other nodes
 func (b *Beacon) NewRound(r int) {
+	if r > b.c.RoundsToSimulate {
+		return
+	}
 	if r != b.round {
 		log.Lvl2("beacon service received different round")
 		return

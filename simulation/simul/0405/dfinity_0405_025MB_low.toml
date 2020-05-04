@@ -1,0 +1,19 @@
+Simulation = "dfinity"
+Servers = 10
+Rounds = 10
+Suite = "bn256.G2"
+RunWait = "6000s"
+Delay = 100
+Seed = 123456789
+BeaconNb = 1
+BlockMakerNb = 2
+BlockSize = 250000
+BlockTime = 200 
+FinalizeTime = 200
+
+Hosts, Bf, NotarizerNb, Threshold
+13, 12, 10, 7
+28, 27, 25, 17
+53, 52, 50, 34
+78, 77, 75, 50
+103, 102, 100, 67
