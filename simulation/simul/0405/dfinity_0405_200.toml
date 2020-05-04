@@ -8,6 +8,7 @@ Threshold = 134
 Suite = "bn256.G2"
 RunWait = "6000s"
 Delay = 100
+Bandwdith = 35
 Seed = 123456789
 BeaconNb = 1
 BlockMakerNb = 2

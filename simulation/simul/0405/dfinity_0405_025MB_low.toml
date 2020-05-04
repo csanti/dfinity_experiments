@@ -3,6 +3,7 @@ Servers = 10
 Rounds = 10
 Suite = "bn256.G2"
 RunWait = "6000s"
+Bandwidth = 35
 Delay = 100
 Seed = 123456789
 BeaconNb = 1
